@@ -12,9 +12,28 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			assert(false && "No Implemented Yet!");
-			return false;
+			const float componentA{ ray.direction * ray.direction };
+			const float componentB{ 2 * ray.direction * (ray.origin - sphere.origin) };
+			const float componentC{ (ray.origin - sphere.origin) * (ray.origin - sphere.origin) - static_cast<float>(pow(sphere.radius,2)) };
+			const float discriminant{ static_cast<float>(pow(componentB,2) - 4 * componentA * componentC) };
+			//Check if Discriminant is smaller than 0 if yes the ray did not hit the sphere
+			if(discriminant <= 0)
+				return false;
+			//Calculate hit
+			float result{ (-componentB - sqrt(discriminant)) / 2 * componentA };
+			//check if hit is behind origin
+			if (result < ray.min)
+				result = (-componentB + sqrt(discriminant)) / 2 * componentA;
+			if (result > ray.max || result < ray.min)
+				return false;
+			if (ignoreHitRecord)
+				return true;
+
+			hitRecord.didHit = true;
+			hitRecord.t = result;
+			hitRecord.materialIndex = sphere.materialIndex;
+			Vector3 normal{ sphere.origin,ray.origin + result * ray.direction };
+			hitRecord.normal = Vector3{ normal / normal.Magnitude() };
 		}
 
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
@@ -27,9 +46,25 @@ namespace dae
 		//PLANE HIT-TESTS
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W1
-			assert(false && "No Implemented Yet!");
-			return false;
+			//check if ray hits
+			const float denominator{ Vector3::Dot(plane.normal, ray.direction)};
+			if (denominator < 0.0001f)
+				return false;
+			//calculate T
+			const float result{Vector3::Dot((plane.origin - ray.origin), plane.normal) / denominator};
+			//Check if T is in the range of the ray
+			if(result < ray.min || result > ray.max)
+				return false;
+
+			//Assign Hitrecord
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = plane.materialIndex;
+			const Vector3 vectorToHit{ ray.origin + result * ray.direction };
+			hitRecord.normal = Vector3::Cross(plane.origin, vectorToHit);
+			hitRecord.origin = ray.origin;
+			hitRecord.t = result;
+			return true;
+
 		}
 
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray)

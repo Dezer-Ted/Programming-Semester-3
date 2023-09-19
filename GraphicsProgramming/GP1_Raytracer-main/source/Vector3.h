@@ -32,6 +32,7 @@ namespace dae
 
 		//Member Operators
 		Vector3 operator*(float scale) const;
+		float operator*(Vector3 dot) const;
 		Vector3 operator/(float scale) const;
 		Vector3 operator+(const Vector3& v) const;
 		Vector3 operator-(const Vector3& v) const;

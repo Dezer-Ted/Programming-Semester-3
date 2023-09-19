@@ -91,7 +91,10 @@ namespace dae {
 	{
 		return { x * scale, y * scale, z * scale };
 	}
-
+	float Vector3::operator*(Vector3 dot) const
+	{
+		return Dot(*this, dot);
+	}
 	Vector3 Vector3::operator/(float scale) const
 	{
 		return { x / scale, y / scale, z / scale };
