@@ -33,14 +33,16 @@ void Renderer::Render(Scene* pScene) const
 		for (int py{}; py < m_Height; ++py)
 		{
 			Vector3 rayDirection{
-				(2.f * (px + 0.5f) / m_Width - 1.f) * aspectRatio,
-				1.f-2.f*py/m_Height,
+				(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f) * aspectRatio,
+				1.f-2.f* static_cast<float>(py)/ static_cast<float>(m_Height),
 				1.f
 			};
 			Ray hitRay{ {0,0,0},rayDirection };
 			//ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
+			/*Sphere testsphere{ {0.f,0.f,100.f},50.f,0 };
+			GeometryUtils::HitTest_Sphere(testsphere, hitRay,closestHit);*/
 			pScene->GetClosestHit(hitRay, closestHit);
 			/*Plane testPlane{ {0.f,-50,0.f},{0.f,1.f,0.f},0 };
 			GeometryUtils::HitTest_Plane(testPlane, hitRay, closestHit);*/

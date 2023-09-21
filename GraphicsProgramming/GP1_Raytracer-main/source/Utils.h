@@ -9,33 +9,65 @@ namespace dae
 	namespace GeometryUtils
 	{
 #pragma region Sphere HitTest
+		inline float Remap(float a, float b, float t) { return (t - a) / (b - a); }
+
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			const float componentA{ ray.direction * ray.direction };
-			const float componentB{ 2 * ray.direction * (ray.origin - sphere.origin) };
-			const float componentC{ (ray.origin - sphere.origin) * (ray.origin - sphere.origin) - static_cast<float>(pow(sphere.radius,2)) };
-			const float discriminant{ static_cast<float>(pow(componentB,2) - 4 * componentA * componentC) };
-			//Check if Discriminant is smaller than 0 if yes the ray did not hit the sphere
-			if(discriminant <= 0)
-				return false;
-			//Calculate hit
-			float result{ (-componentB - sqrt(discriminant)) / 2 * componentA };
-			//check if hit is behind origin
-			if (result < ray.min)
-				result = (-componentB + sqrt(discriminant)) / 2 * componentA;
-			if (result > ray.max || result < ray.min)
-				return false;
-			if (ignoreHitRecord)
-				return true;
+			//const float componentA{ ray.direction * ray.direction };
+			//const float componentB{ 2 * ray.direction * (ray.origin - sphere.origin) };
+			//const float componentC{ (ray.origin - sphere.origin) * (ray.origin - sphere.origin) - static_cast<float>(pow(sphere.radius,2)) };
+			//const float discriminant{ static_cast<float>(pow(componentB,2) - 4 * componentA * componentC) };
+			////Check if Discriminant is smaller than 0 if yes the ray did not hit the sphere
+			//if(discriminant <= 0)
+			//	return false;
+			////Calculate hit
+			//float result{ (-componentB - sqrt(discriminant)) / 2 * componentA };
+			////check if hit is behind origin
+			//if (result < ray.min)
+			//	result = (-componentB + sqrt(discriminant)) / 2 * componentA;
+			//if (result > ray.max || result < ray.min)
+			//	return false;
+			//if (ignoreHitRecord)
+			//	return true;
 
+			//hitRecord.didHit = true;
+			//hitRecord.t = result;
+			//hitRecord.materialIndex = sphere.materialIndex;
+			//Vector3 normal{ sphere.origin,ray.origin + result * ray.direction };
+			//hitRecord.normal = Vector3{ normal / normal.Magnitude() };
+			
+			const Vector3 l{ sphere.origin- ray.origin };
+			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
+			//by using the direction and the distance between the spheres origin and the rays
+			const float tca{ Vector3::Dot(l , ray.direction) };
+			if (tca < 0)
+				return false;
+			const Vector3 P{ tca * ray.direction };
+
+			const float od{ (sphere.origin - P).Magnitude() };
+			if (od >= sphere.radius)
+				return false;
+
+			const float thc{ sphere.radiusSquared - od * od };
+			float t0{ tca - thc };
+
+			if (t0 > ray.max)
+				return false;
+			if (t0 < ray.min)
+			{
+				t0 = tca + thc;
+				if (t0 > ray.max || t0 < ray.min)
+					return false;
+			}
+			
 			hitRecord.didHit = true;
-			hitRecord.t = result;
+			hitRecord.t = Remap(sphere.origin.z, sphere.origin.z - sphere.radius, t0);
 			hitRecord.materialIndex = sphere.materialIndex;
-			Vector3 normal{ sphere.origin,ray.origin + result * ray.direction };
+			Vector3 normal{ sphere.origin,ray.origin + t0 * ray.direction };
 			hitRecord.normal = Vector3{ normal / normal.Magnitude() };
+			return true;
 		}
-
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
 		{
 			HitRecord temp{};
@@ -47,8 +79,8 @@ namespace dae
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//check if ray hits
-			const float denominator{ Vector3::Dot(plane.normal, ray.direction)};
-			if (denominator < 0.0001f)
+			const float denominator{ Vector3::Dot(ray.direction, plane.normal)};
+			if (denominator > 0.0001f)
 				return false;
 			//calculate T
 			const float result{Vector3::Dot((plane.origin - ray.origin), plane.normal) / denominator};
@@ -64,6 +96,8 @@ namespace dae
 			hitRecord.origin = ray.origin;
 			hitRecord.t = result;
 			return true;
+		
+			
 
 		}
 

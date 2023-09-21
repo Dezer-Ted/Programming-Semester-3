@@ -11,8 +11,15 @@ namespace dae
 	{
 		Vector3 origin{};
 		float radius{};
+		float radiusSquared{};
 
 		unsigned char materialIndex{ 0 };
+		Sphere(const Vector3& orig, float rad, unsigned char matIndex)
+			:origin{orig},
+			radius{rad},
+			radiusSquared{static_cast<float>(pow(rad,2))},
+			materialIndex{matIndex}
+		{	}
 	};
 
 	struct Plane

@@ -57,10 +57,10 @@ namespace dae {
 #pragma region Scene Helpers
 	Sphere* Scene::AddSphere(const Vector3& origin, float radius, unsigned char materialIndex)
 	{
-		Sphere s;
-		s.origin = origin;
+		Sphere s{origin,radius,materialIndex};
+		/*s.origin = origin;
 		s.radius = radius;
-		s.materialIndex = materialIndex;
+		s.materialIndex = materialIndex;*/
 
 		m_SphereGeometries.emplace_back(s);
 		return &m_SphereGeometries.back();
