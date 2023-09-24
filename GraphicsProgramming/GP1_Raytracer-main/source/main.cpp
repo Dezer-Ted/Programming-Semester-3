@@ -32,7 +32,7 @@ int main(int argc, char* args[])
 
 	const uint32_t width = 640;
 	const uint32_t height = 480;
-
+	std::cout << "I swallowed shampoo";
 	SDL_Window* pWindow = SDL_CreateWindow(
 		"RayTracer - Munster Ben",
 		SDL_WINDOWPOS_UNDEFINED,
