@@ -29,7 +29,6 @@ int main(int argc, char* args[])
 
 	//Create window + surfaces
 	SDL_Init(SDL_INIT_VIDEO);
-
 	const uint32_t width = 640;
 	const uint32_t height = 480;
 	SDL_Window* pWindow = SDL_CreateWindow(
@@ -45,7 +44,7 @@ int main(int argc, char* args[])
 	const auto pTimer = new Timer();
 	const auto pRenderer = new Renderer(pWindow);
 
-	const auto pScene = new Scene_W1();
+	const auto pScene = new Scene_W2();
 	pScene->Initialize();
 
 	//Start loop

@@ -19,7 +19,7 @@ namespace dae {
 			const Vector4& t);
 
 		Matrix(const Matrix& m);
-
+		void PrintMatrix();
 		Vector3 TransformVector(const Vector3& v) const;
 		Vector3 TransformVector(float x, float y, float z) const;
 		Vector3 TransformPoint(const Vector3& p) const;

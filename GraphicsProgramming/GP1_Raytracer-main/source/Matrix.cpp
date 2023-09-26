@@ -4,6 +4,7 @@
 
 #include "MathHelpers.h"
 #include <cmath>
+#include <iostream>
 
 namespace dae {
 	Matrix::Matrix(const Vector3& xAxis, const Vector3& yAxis, const Vector3& zAxis, const Vector3& t) :
@@ -105,8 +106,9 @@ namespace dae {
 	Matrix Matrix::CreateTranslation(float x, float y, float z)
 	{
 		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix translation{};
+		translation.data[3] = Vector4{ x,y,z,1 };
+		return {translation};
 	}
 
 	Matrix Matrix::CreateTranslation(const Vector3& t)
@@ -117,29 +119,39 @@ namespace dae {
 	Matrix Matrix::CreateRotationX(float pitch)
 	{
 		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix rotation{  };
+		rotation.data[0] = Vector4{ 1,0,0,3 };
+		rotation.data[1] = Vector4{ 0, cos(pitch),sin(pitch),0 };
+		rotation.data[2] = Vector4{ 0, -sin(pitch),cos(pitch),0 };
+		return rotation;
 	}
 
 	Matrix Matrix::CreateRotationY(float yaw)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix rotation{  };
+		rotation.data[0] = Vector4{ cos(yaw),0,sin(yaw),0};
+		rotation.data[1] = Vector4{ 0,1,0,3 };
+		rotation.data[2] = Vector4{ -sin(yaw),0,cos(yaw),0 };
+		return rotation;
 	}
 
 	Matrix Matrix::CreateRotationZ(float roll)
 	{
 		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix rotation{  };
+		rotation.data[0] = Vector4{ cos(roll),-sin(roll),0,0 };
+		rotation.data[1] = Vector4{ sin(roll),cos(roll),0,0 };
+		rotation.data[2] = Vector4{ 0,0,1,3 };
+		return rotation;
 	}
 
 	Matrix Matrix::CreateRotation(const Vector3& r)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix pitch{CreateRotationX(r.x)};
+		Matrix yaw{CreateRotationY(r.y)};
+		Matrix roll{CreateRotationZ(r.z)};
+		
+		return roll * yaw * pitch;
 	}
 
 	Matrix Matrix::CreateRotation(float pitch, float yaw, float roll)
@@ -149,9 +161,13 @@ namespace dae {
 
 	Matrix Matrix::CreateScale(float sx, float sy, float sz)
 	{
-		//todo W2
-		assert(false && "Not Implemented Yet");
-		return {};
+		Matrix scale{};
+		scale.data[0] = Vector4{ sx,0,0 ,0};
+		scale.data[1] = Vector4{ 0,sy,0 ,0};
+		scale.data[2] = Vector4{ 0,0,sz ,0};
+		
+
+		return scale;
 	}
 
 	Matrix Matrix::CreateScale(const Vector3& s)
@@ -204,4 +220,13 @@ namespace dae {
 		return *this;
 	}
 #pragma endregion
+	void Matrix::PrintMatrix()
+	{
+		for(int index = 0; index < 4; index++)
+		{
+			std::cout << data[index].x << " " << data[index].y << " " << data[index].z << " " << data[index].w << " \n";
+		}
+
+	}
+
 }

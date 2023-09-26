@@ -27,17 +27,20 @@ void Renderer::Render(Scene* pScene) const
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
 	float aspectRatio = static_cast<float>(m_Width) / m_Height;
+	Matrix cameraOnb{ camera.CalculateCameraToWorld() };
+
 
 	for (int px{}; px < m_Width; ++px)
 	{
 		for (int py{}; py < m_Height; ++py)
 		{
 			Vector3 rayDirection{
-				(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f) * aspectRatio,
-				1.f-2.f* static_cast<float>(py)/ static_cast<float>(m_Height),
+				(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f) * aspectRatio * camera.fovScale,
+				(1.f-2.f* static_cast<float>(py)/ static_cast<float>(m_Height))*camera.fovScale,
 				1.f
 			};
-			Ray hitRay{ {0,0,0},rayDirection };
+			rayDirection = cameraOnb.TransformVector(rayDirection);
+			Ray hitRay{ camera.origin,rayDirection };
 			//ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
