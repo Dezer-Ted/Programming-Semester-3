@@ -40,20 +40,14 @@ void Renderer::Render(Scene* pScene) const
 				1.f
 			};
 			rayDirection = cameraOnb.TransformVector(rayDirection);
+			rayDirection.Normalize();
 			Ray hitRay{ camera.origin,rayDirection };
-			//ColorRGB finalColor{ rayDirection.x, rayDirection.y, rayDirection.z };
 			ColorRGB finalColor{};
 			HitRecord closestHit{};
-			/*Sphere testsphere{ {0.f,0.f,100.f},50.f,0 };
-			GeometryUtils::HitTest_Sphere(testsphere, hitRay,closestHit);*/
 			pScene->GetClosestHit(hitRay, closestHit);
-			/*Plane testPlane{ {0.f,-50,0.f},{0.f,1.f,0.f},0 };
-			GeometryUtils::HitTest_Plane(testPlane, hitRay, closestHit);*/
 			if (closestHit.didHit)
 			{
 				finalColor = materials[closestHit.materialIndex]->Shade();
-				//const float scaled_t = (closestHit.t - 50.f) / 40.f;
-				
 			}
 
 			//Update Color in Buffer

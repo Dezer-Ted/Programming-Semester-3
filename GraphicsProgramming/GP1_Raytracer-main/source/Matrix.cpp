@@ -125,7 +125,7 @@ namespace dae {
 		rotation.data[2] = Vector4{ 0, -sin(pitch),cos(pitch),0 };
 		return rotation;
 	}
-
+	
 	Matrix Matrix::CreateRotationY(float yaw)
 	{
 		Matrix rotation{  };

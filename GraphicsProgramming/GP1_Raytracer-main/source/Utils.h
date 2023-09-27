@@ -41,31 +41,33 @@ namespace dae
 			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
 			//by using the direction and the distance between the spheres origin and the rays
 			const float tca{ Vector3::Dot(l , ray.direction) };
-			if (tca < 0)
-				return false;
-			const Vector3 P{ tca * ray.direction };
+			/*if (tca < 0)
+				return false;*/
+			const Vector3 P{ l - tca * ray.direction };
 
-			const float od{ (sphere.origin - P).Magnitude() };
+			const float od{ P.Magnitude() };
 			if (od >= sphere.radius)
 				return false;
 
-			const float thc{ sphere.radiusSquared - od * od };
+			//const float thc{ static_cast<float>(pow(sphere.radiusSquared,2)) - static_cast<float>(pow(od,2))};
+			const float thc{ static_cast<float>(sqrt(sphere.radiusSquared * static_cast<float>(pow(od,2)))) };
 			float t0{ tca - thc };
 
-			if (t0 > ray.max)
-				return false;
+			/*if (t0 > ray.max)
+				return false;*/
 			if (t0 < ray.min)
 			{
 				t0 = tca + thc;
 				if (t0 > ray.max || t0 < ray.min)
 					return false;
 			}
-			
 			hitRecord.didHit = true;
-			hitRecord.t = Remap(sphere.origin.z, sphere.origin.z - sphere.radius, t0);
+			//hitRecord.t = Remap(sphere.origin.z, sphere.origin.z - sphere.radius, t0);
+			hitRecord.t = t0;
 			hitRecord.materialIndex = sphere.materialIndex;
-			Vector3 normal{ sphere.origin,ray.origin + t0 * ray.direction };
-			hitRecord.normal = Vector3{ normal / normal.Magnitude() };
+			hitRecord.origin = ray.origin + ray.direction * thc;
+			//Vector3 normal{ sphere.origin,ray.origin + t0 * ray.direction };
+			hitRecord.normal = (hitRecord.origin - sphere.origin) / sphere.radius;
 			return true;
 		}
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray)
