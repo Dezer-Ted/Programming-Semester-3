@@ -39,6 +39,7 @@ void Renderer::Render(Scene* pScene) const
 				(1.f-2.f* static_cast<float>(py)/ static_cast<float>(m_Height))*camera.fovScale,
 				1.f
 			};
+			
 			rayDirection = cameraOnb.TransformVector(rayDirection);
 			rayDirection.Normalize();
 			Ray hitRay{ camera.origin,rayDirection };
@@ -48,6 +49,23 @@ void Renderer::Render(Scene* pScene) const
 			if (closestHit.didHit)
 			{
 				finalColor = materials[closestHit.materialIndex]->Shade();
+
+				for (const Light& light : lights)
+				{
+					Vector3 lightDirection{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
+					const float lightDistance = lightDirection.Normalize();
+
+					const Ray lightRay{
+						closestHit.origin + closestHit.normal * 0.01f,
+						lightDirection, 0.0001f, lightDistance
+					};
+
+					if (pScene->DoesHit(lightRay))
+					{
+						finalColor *= 0.5;
+						break;
+					}
+				}
 			}
 
 			//Update Color in Buffer

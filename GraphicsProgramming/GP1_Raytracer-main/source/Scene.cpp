@@ -50,8 +50,21 @@ namespace dae {
 
 	bool Scene::DoesHit(const Ray& ray) const
 	{
-		//todo W3
-		assert(false && "No Implemented Yet!");
+		HitRecord temp;
+		for (int index{ 0 }; index < GetSphereGeometries().size(); ++index)
+		{
+			if (GeometryUtils::HitTest_Sphere(GetSphereGeometries()[index], ray, temp,true))
+			{
+				return true;
+			}
+		}
+		for (int index{ 0 }; index < GetPlaneGeometries().size(); ++index)
+		{
+			if (GeometryUtils::HitTest_Plane(GetPlaneGeometries()[index], ray, temp,true))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 

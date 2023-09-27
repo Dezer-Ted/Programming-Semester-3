@@ -9,34 +9,10 @@ namespace dae
 	namespace GeometryUtils
 	{
 #pragma region Sphere HitTest
-		inline float Remap(float a, float b, float t) { return (t - a) / (b - a); }
 
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
-		{
-			//const float componentA{ ray.direction * ray.direction };
-			//const float componentB{ 2 * ray.direction * (ray.origin - sphere.origin) };
-			//const float componentC{ (ray.origin - sphere.origin) * (ray.origin - sphere.origin) - static_cast<float>(pow(sphere.radius,2)) };
-			//const float discriminant{ static_cast<float>(pow(componentB,2) - 4 * componentA * componentC) };
-			////Check if Discriminant is smaller than 0 if yes the ray did not hit the sphere
-			//if(discriminant <= 0)
-			//	return false;
-			////Calculate hit
-			//float result{ (-componentB - sqrt(discriminant)) / 2 * componentA };
-			////check if hit is behind origin
-			//if (result < ray.min)
-			//	result = (-componentB + sqrt(discriminant)) / 2 * componentA;
-			//if (result > ray.max || result < ray.min)
-			//	return false;
-			//if (ignoreHitRecord)
-			//	return true;
-
-			//hitRecord.didHit = true;
-			//hitRecord.t = result;
-			//hitRecord.materialIndex = sphere.materialIndex;
-			//Vector3 normal{ sphere.origin,ray.origin + result * ray.direction };
-			//hitRecord.normal = Vector3{ normal / normal.Magnitude() };
-			
+		{			
 			const Vector3 l{ sphere.origin- ray.origin };
 			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
 			//by using the direction and the distance between the spheres origin and the rays
@@ -52,9 +28,6 @@ namespace dae
 			//const float thc{ static_cast<float>(pow(sphere.radiusSquared,2)) - static_cast<float>(pow(od,2))};
 			const float thc{ static_cast<float>(sqrt(sphere.radiusSquared * static_cast<float>(pow(od,2)))) };
 			float t0{ tca - thc };
-
-			/*if (t0 > ray.max)
-				return false;*/
 			if (t0 < ray.min)
 			{
 				t0 = tca + thc;
@@ -62,11 +35,9 @@ namespace dae
 					return false;
 			}
 			hitRecord.didHit = true;
-			//hitRecord.t = Remap(sphere.origin.z, sphere.origin.z - sphere.radius, t0);
 			hitRecord.t = t0;
 			hitRecord.materialIndex = sphere.materialIndex;
-			hitRecord.origin = ray.origin + ray.direction * thc;
-			//Vector3 normal{ sphere.origin,ray.origin + t0 * ray.direction };
+			hitRecord.origin = ray.origin + ray.direction * t0;
 			hitRecord.normal = (hitRecord.origin - sphere.origin) / sphere.radius;
 			return true;
 		}
@@ -93,9 +64,9 @@ namespace dae
 			//Assign Hitrecord
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = plane.materialIndex;
-			const Vector3 vectorToHit{ ray.origin + result * ray.direction };
-			hitRecord.normal = Vector3::Cross(plane.origin, vectorToHit);
-			hitRecord.origin = ray.origin;
+			
+			hitRecord.normal = plane.normal;
+			hitRecord.origin = ray.origin + ray.direction * result;
 			hitRecord.t = result;
 			return true;
 		
@@ -145,9 +116,16 @@ namespace dae
 		//Direction from target to light
 		inline Vector3 GetDirectionToLight(const Light& light, const Vector3 origin)
 		{
-			//todo W3
-			assert(false && "No Implemented Yet!");
-			return {};
+			Vector3 direction{};
+			if (light.type == LightType::Point)
+			{
+				direction =   light.origin- origin;
+			}
+			else
+			{
+				direction = light.direction * FLT_MAX;
+			}
+			return direction;
 		}
 
 		inline ColorRGB GetRadiance(const Light& light, const Vector3& target)
