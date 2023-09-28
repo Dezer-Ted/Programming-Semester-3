@@ -17,23 +17,21 @@ namespace dae
 			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
 			//by using the direction and the distance between the spheres origin and the rays
 			const float tca{ Vector3::Dot(l , ray.direction) };
-			/*if (tca < 0)
-				return false;*/
-			const Vector3 P{ l - tca * ray.direction };
 
-			const float od{ P.Magnitude() };
-			if (od >= sphere.radius)
+			if (tca <= 0)
 				return false;
 
-			//const float thc{ static_cast<float>(pow(sphere.radiusSquared,2)) - static_cast<float>(pow(od,2))};
-			const float thc{ static_cast<float>(sqrt(sphere.radiusSquared * static_cast<float>(pow(od,2)))) };
+			const float od{ l.SqrMagnitude() - tca * tca };
+			if (od > sphere.radiusSquared)
+				return false;
+
+			const float thc{ sqrt(static_cast<float>(sphere.radiusSquared * od)) };
 			float t0{ tca - thc };
-			if (t0 < ray.min)
-			{
-				t0 = tca + thc;
-				if (t0 > ray.max || t0 < ray.min)
-					return false;
-			}
+			if (t0< ray.min || t0>ray.max)
+				return false;
+
+			if (ignoreHitRecord)
+				return true;
 			hitRecord.didHit = true;
 			hitRecord.t = t0;
 			hitRecord.materialIndex = sphere.materialIndex;
@@ -51,12 +49,9 @@ namespace dae
 		//PLANE HIT-TESTS
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//check if ray hits
-			const float denominator{ Vector3::Dot(ray.direction, plane.normal)};
-			if (denominator > 0.0001f)
-				return false;
 			//calculate T
-			const float result{Vector3::Dot((plane.origin - ray.origin), plane.normal) / denominator};
+			const float result{Vector3::Dot((plane.origin - ray.origin), plane.normal) / Vector3::Dot(ray.direction, plane.normal) };
+
 			//Check if T is in the range of the ray
 			if(result < ray.min || result > ray.max)
 				return false;
@@ -69,9 +64,6 @@ namespace dae
 			hitRecord.origin = ray.origin + ray.direction * result;
 			hitRecord.t = result;
 			return true;
-		
-			
-
 		}
 
 		inline bool HitTest_Plane(const Plane& plane, const Ray& ray)
@@ -119,7 +111,7 @@ namespace dae
 			Vector3 direction{};
 			if (light.type == LightType::Point)
 			{
-				direction =   light.origin- origin;
+				direction =   light.origin - origin;
 			}
 			else
 			{

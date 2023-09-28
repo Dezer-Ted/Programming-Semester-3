@@ -69,7 +69,6 @@ namespace dae
 			forward = finalRotation.TransformVector(Vector3::UnitZ);
 			forward.Normalize();
 			//todo: W2
-			//assert(false && "Not Implemented Yet");
 		}
 		void HandleMouseRotation(const uint32_t& mouseState, int mouseY, dae::Timer* pTimer, int mouseX)
 		{
