@@ -28,8 +28,7 @@ namespace dae {
 
 	void dae::Scene::GetClosestHit(const Ray& ray, HitRecord& closestHit) const
 	{
-		HitRecord tempClosestHit;
-		tempClosestHit.t = FLT_MAX;
+		HitRecord tempClosestHit{};
 		for (int index{0}; index < GetSphereGeometries().size(); ++index)
 		{
 			if (GeometryUtils::HitTest_Sphere(GetSphereGeometries()[index], ray, tempClosestHit))

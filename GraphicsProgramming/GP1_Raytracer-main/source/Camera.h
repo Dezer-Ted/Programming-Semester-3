@@ -42,10 +42,10 @@ namespace dae
 			
 			right = Vector3::Cross(Vector3::UnitY,forward);
 			Vector3 up{ Vector3::Cross(forward,right) };
-			onb[0] = Vector4{ right.x, right.y,right.z,0 };
-			onb[1] = Vector4{ up.x,up.y,up.z,0 };
-			onb[2] = Vector4{ forward.x,forward.y,forward.z,0 };
-			onb[3] = Vector4{ origin.x,origin.y,origin.z,1 };
+			onb[0] = Vector4{ right,0 };
+			onb[1] = Vector4{ up,0 };
+			onb[2] = Vector4{ forward,0 };
+			onb[3] = Vector4{ origin,1 };
 			return onb;
 		}
 

@@ -16,18 +16,18 @@ namespace dae
 			const Vector3 l{ sphere.origin- ray.origin };
 			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
 			//by using the direction and the distance between the spheres origin and the rays
-			const float tca{ Vector3::Dot(l , ray.direction) };
+			const float tca{ Vector3::Dot(ray.direction,l) };
 
 			if (tca <= 0)
-				return false;
+				return false; 
 
-			const float od{ l.SqrMagnitude() - tca * tca };
+			const float od{ l.SqrMagnitude() - (tca * tca) };
 			if (od > sphere.radiusSquared)
 				return false;
 
-			const float thc{ sqrt(static_cast<float>(sphere.radiusSquared * od)) };
+			const float thc{ sqrt(sphere.radiusSquared - od) };
 			float t0{ tca - thc };
-			if (t0< ray.min || t0>ray.max)
+			if (t0 < ray.min || t0 > ray.max)
 				return false;
 
 			if (ignoreHitRecord)
@@ -56,6 +56,8 @@ namespace dae
 			if(result < ray.min || result > ray.max)
 				return false;
 
+			if (ignoreHitRecord)
+				return true;
 			//Assign Hitrecord
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = plane.materialIndex;

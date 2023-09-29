@@ -26,9 +26,9 @@ void Renderer::Render(Scene* pScene) const
 	Camera& camera = pScene->GetCamera();
 	auto& materials = pScene->GetMaterials();
 	auto& lights = pScene->GetLights();
-	float aspectRatio = static_cast<float>(m_Width) / m_Height;
 	Matrix cameraOnb{ camera.CalculateCameraToWorld() };
 
+	float aspectRatio = static_cast<float>(m_Width) / m_Height;
 
 	for (int px{}; px < m_Width; ++px)
 	{
@@ -36,7 +36,7 @@ void Renderer::Render(Scene* pScene) const
 		{
 			Vector3 rayDirection{
 				(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f) * aspectRatio * camera.fovScale,
-				(1.f-2.f* static_cast<float>(py)/ static_cast<float>(m_Height))*camera.fovScale,
+				(1.f-2.f* (static_cast<float>(py)+0.5f)/ static_cast<float>(m_Height))*camera.fovScale,
 				1.f
 			};
 			

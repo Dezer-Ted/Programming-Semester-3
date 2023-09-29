@@ -17,7 +17,7 @@ namespace dae
 		Sphere(const Vector3& orig, float rad, unsigned char matIndex)
 			:origin{orig},
 			radius{rad},
-			radiusSquared{static_cast<float>(pow(rad,2))},
+			radiusSquared{rad*rad},
 			materialIndex{matIndex}
 		{	}
 	};
