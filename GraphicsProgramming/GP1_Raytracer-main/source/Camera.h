@@ -20,18 +20,30 @@ namespace dae
 		}
 
 
+		const float rotationSpeed{ 100.f };
+		const float movementSpeed{ 10.f };
+		const float maxCooldown{ .2f };
+
 		Vector3 origin{};
 		float fovAngle{90.f};
 		float fovScale{ tan((TO_RADIANS * fovAngle) / 2) };
-		const float movementSpeed{ 10.f };
-		const float rotationSpeed{ 100.f };
-		
 		Vector3 forward{ Vector3::UnitZ};
 		Vector3 up{ Vector3::UnitY };
 		Vector3 right{ Vector3::UnitX };
 		float totalPitch{0.f};
 		float totalYaw{0.f};
+		float currentCooldown{ maxCooldown };
+		bool shadowToggle{ true };
+		bool justClicked{ false };
 
+		enum class LightingMode
+		{
+			ObservedArea,
+			Radiance,
+			BRDF,
+			Combined
+		};
+		LightingMode lightingMode{};
 		Matrix cameraToWorld{};
 
 
@@ -60,7 +72,7 @@ namespace dae
 			//Mouse Input
 			int mouseX{}, mouseY{};
 			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
-
+			ChangeMode(pKeyboardState,pTimer);
 			HandleMouseMovement(mouseState, mouseY, pTimer);
 
 			HandleMouseRotation(mouseState, mouseY, pTimer, mouseX);
@@ -144,6 +156,42 @@ namespace dae
 				origin += ((right / right.Magnitude()) * movementSpeed) * pTimer->GetElapsed();
 			}
 		}
+		void ChangeMode(const uint8_t* pKeyboardState, dae::Timer* pTimer)
+		{
+			if (justClicked)
+			{
+				currentCooldown -= pTimer->GetElapsed();
+				if (currentCooldown <= 0)
+				{
+					currentCooldown = maxCooldown;
+					justClicked = false;
+				}
+			}
+			else if (pKeyboardState[SDL_SCANCODE_F2] == true)
+			{
+				if (shadowToggle)
+				{
+					shadowToggle = false;
+					justClicked = true;
+				}
+				else
+				{
+					shadowToggle = true;
+					justClicked = true;
+				}
+			}
+			else if (pKeyboardState[SDL_SCANCODE_F3] == true)
+			{
+				int lightmodeInt = static_cast<int>(lightingMode);
+				lightmodeInt++;
+				if (lightmodeInt >= 4)
+					lightmodeInt = 0;
+				lightingMode = static_cast<LightingMode>(lightmodeInt);
+
+				shadowToggle = false;
+				justClicked = true;
+			}
+		}
 		void CalculateFOVScale()
 		{
 			fovScale = tan((TO_RADIANS * fovAngle) / 2);
@@ -153,6 +201,13 @@ namespace dae
 			fovAngle = angle;
 			CalculateFOVScale();
 		}
-		
+		bool GetShadowState() const
+		{
+			return shadowToggle;
+		}
+		LightingMode GetLightingMode() const
+		{
+			return lightingMode;
+		}
 	};
 }

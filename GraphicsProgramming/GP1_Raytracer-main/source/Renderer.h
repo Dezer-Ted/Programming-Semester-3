@@ -23,14 +23,15 @@ namespace dae
 
 		void Render(Scene* pScene) const;
 		bool SaveBufferToImage() const;
-
+		void SetShadows(bool shadowsEnabled);
+		
 	private:
 		SDL_Window* m_pWindow{};
 
 		SDL_Surface* m_pBuffer{};
 		uint32_t* m_pBufferPixels{};
 		std::vector<uint32_t> m_ImageHorizontalIterator, m_ImageVerticalIterator;
-
+		bool m_ShadowsEnabled{};
 		int m_Width{};
 		int m_Height{};
 	};
