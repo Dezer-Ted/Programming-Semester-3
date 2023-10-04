@@ -105,19 +105,29 @@ namespace dae
 		Material_CookTorrence(const ColorRGB& albedo, float metalness, float roughness):
 			m_Albedo(albedo), m_Metalness(metalness), m_Roughness(roughness)
 		{
+			m_RoughnessSqrd = m_Roughness * m_Roughness;
 		}
 
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			//todo: W3
 			//assert(false && "Not Implemented Yet");
-			return {};
+			Vector3 halfVector = (v + l) / ((v + l).Magnitude());
+			halfVector.Normalize();
+			if (m_Metalness == 0)
+			{
+				m_Albedo = { 0.04f,0.04f,0.04f };
+			}
+			ColorRGB F{ BRDF::FresnelFunction_Schlick(halfVector,v,m_Albedo) };
+			float D{ BRDF::NormalDistribution_GGX(hitRecord.normal,halfVector,m_RoughnessSqrd) };
+			return {F*D};
 		}
 
 	private:
 		ColorRGB m_Albedo{0.955f, 0.637f, 0.538f}; //Copper
 		float m_Metalness{1.0f};
 		float m_Roughness{0.1f}; // [1.0 > 0.0] >> [ROUGH > SMOOTH]
+		float m_RoughnessSqrd{};
 	};
 #pragma endregion
 }
