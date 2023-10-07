@@ -54,6 +54,7 @@ namespace dae
 		{
 			
 			return { f0 + (ColorRGB{1,1,1} - f0) * powf((1 - (h * v)),5) };
+
 		}
 
 		/**
@@ -65,10 +66,10 @@ namespace dae
 		 */
 		static float NormalDistribution_GGX(const Vector3& n, const Vector3& h, float roughness)
 		{
-			//todo: W3
-			//assert(false && "Not Implemented Yet");
-			
-			return { roughness / (PI * ((n * h) * (n * h) * (roughness - 1) + 1)) };
+		
+			const float nh{ n * h };
+			const float denom{ (nh * nh) * ((roughness * roughness) - 1) + 1 };
+			return { (roughness * roughness) / (PI * (denom * denom)) };
 		}
 
 
@@ -81,10 +82,11 @@ namespace dae
 		 */
 		static float GeometryFunction_SchlickGGX(const Vector3& n, const Vector3& v, float roughness)
 		{
-			//todo: W3
-			//assert(false && "Not Implemented Yet");
+			
+			const float nv{ std::max(n * v, 0.0f) };
+			const float kDirect{ ((roughness + 1.f) * (roughness + 1.f)) / 8.f };
 
-			return { (n * v) / ((n * v) * (1 - roughness) + roughness) };
+			return { nv / (nv * (1.f - kDirect) + kDirect) };
 		}
 
 		/**
@@ -97,9 +99,9 @@ namespace dae
 		 */
 		static float GeometryFunction_Smith(const Vector3& n, const Vector3& v, const Vector3& l, float roughness)
 		{
-			//todo: W3
-			//assert(false && "Not Implemented Yet");
-			return {};
+		
+			
+			return GeometryFunction_SchlickGGX(n, v, roughness) * GeometryFunction_SchlickGGX(n, l, roughness);
 		}
 
 	}

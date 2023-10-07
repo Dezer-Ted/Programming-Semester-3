@@ -38,102 +38,75 @@ void Renderer::Render(Scene* pScene) const
 	auto& lights = pScene->GetLights();
 	Matrix cameraOnb{ camera.CalculateCameraToWorld() };
 	float aspectRatio = static_cast<float>(m_Width) / m_Height;
-	//switch (camera.GetLightingMode())
-	//{
-	//case Camera::LightingMode::ObservedArea:
-	//	std::cout << "Observed" << std::endl;
-	//	break;
-	//case Camera::LightingMode::Radiance:
-	//	std::cout << "Radianced" << std::endl;
-	//	break;
-	//case Camera::LightingMode::BRDF:
-	//	std::cout << "BRDFed" << std::endl;
-	//	break;
-	//case Camera::LightingMode::Combined:
-	//	std::cout << "Combineded" << std::endl;
-	//	break;
-	//default:
-	//	break;
-	//}
+	
+
 
 	std::for_each(std::execution::par,m_ImageVerticalIterator.begin(), m_ImageVerticalIterator.end(),
-		[this,camera,materials,lights,cameraOnb,aspectRatio,pScene](uint32_t py) 
+		[this,camera,materials,lights,cameraOnb,aspectRatio,pScene](uint32_t py)
 	{
+
 			std::for_each(std::execution::par, m_ImageHorizontalIterator.begin(), m_ImageHorizontalIterator.end(),
 				[this, py,camera, materials, lights, cameraOnb, aspectRatio, pScene](uint32_t px)
 				{
 					Vector3 rayDirection{
-					(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f) * aspectRatio * camera.fovScale,
+					(2.f * (static_cast<float>(px) + 0.5f) / static_cast<float>(m_Width) - 1.f)*aspectRatio * camera.fovScale,
 					(1.f - 2.f * (static_cast<float>(py) + 0.5f) / static_cast<float>(m_Height)) * camera.fovScale,
 					1.f
 					};
+
+
 					
-					rayDirection = cameraOnb.TransformVector(rayDirection);
+					rayDirection = cameraOnb.TransformVector(rayDirection.Normalized());
 					rayDirection.Normalize();
 					Ray hitRay{ camera.origin,rayDirection };
-					ColorRGB finalColor{};
+					Vector3 v{ hitRay.direction.Normalized() * -1.f};
 					HitRecord closestHit{};
+
 					pScene->GetClosestHit(hitRay, closestHit);
 					
+					ColorRGB finalColor{};
+
 					if (closestHit.didHit)
 					{
-
-						
-						
 						for (const Light& light : lights)
 						{
 							Vector3 lightDirection{ LightUtils::GetDirectionToLight(light, closestHit.origin) };
 							const float lightDistance = lightDirection.Normalize();
 
 							const Ray lightRay{
-								closestHit.origin + closestHit.normal * 0.01f,
+								closestHit.origin + closestHit.normal * 0.001f,
 								lightDirection, 0.0001f, lightDistance
 							};
 
-								
-							Vector3 l{ (light.origin - closestHit.origin).Normalized() };
-							Vector3 v{ hitRay.direction.Normalized() * -1.0f };
-							float lambertCos = closestHit.normal * lightRay.direction;
-							ColorRGB objectRadiance = LightUtils::GetRadiance(light, closestHit.origin);
-							ColorRGB radiance{ };
+							const float lambertCos = std::max(0.0f,closestHit.normal * lightRay.direction);
 
-							if (camera.GetLightingMode() == Camera::LightingMode::ObservedArea)
+							if (!(pScene->DoesHit(lightRay) && camera.GetShadowState()))
 							{
-								radiance = ColorRGB{ 1,1,1 } * lambertCos;
+
+								Vector3 l{ (light.origin - closestHit.origin).Normalized() };
+
+								if (camera.GetLightingMode() == Camera::LightingMode::ObservedArea)
+								{
+									finalColor += ColorRGB{ 1,1,1 } * lambertCos;
+								}
+								else if (camera.GetLightingMode() == Camera::LightingMode::Radiance)
+								{
+									finalColor += LightUtils::GetRadiance(light, closestHit.origin);
+								}
+								else if (camera.GetLightingMode() == Camera::LightingMode::BRDF)
+								{
+									finalColor += materials[closestHit.materialIndex]->Shade(closestHit, l, v);
+
+								}
+								else if (camera.GetLightingMode() == Camera::LightingMode::Combined)
+								{
+									finalColor += LightUtils::GetRadiance(light, closestHit.origin) * materials[closestHit.materialIndex]->Shade(closestHit, l, v) * lambertCos;
+
+								}
 							}
-							else if (camera.GetLightingMode() == Camera::LightingMode::Radiance)
-							{
-								radiance = objectRadiance ;
-							}
-							else if (camera.GetLightingMode() == Camera::LightingMode::BRDF)
-							{
-								finalColor = materials[closestHit.materialIndex]->Shade(closestHit,l,v);
-
-							}
-							else if (camera.GetLightingMode() == Camera::LightingMode::Combined)
-							{
-								radiance = objectRadiance * materials[closestHit.materialIndex]->Shade(closestHit,l,v) * lambertCos;
-
-							}
-
-
-							if (lambertCos <= 0)
-								continue;
-
-							if (pScene->DoesHit(lightRay)&& camera.GetShadowState())
-							{
-									finalColor *= 0.5;
-								continue;
-							}
-							
-							finalColor += radiance;
-
-							
 						}
-					
-						
-					}
 
+					}
 					//Update Color in Buffer
 					finalColor.MaxToOne();
 

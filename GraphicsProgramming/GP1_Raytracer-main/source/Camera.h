@@ -188,7 +188,6 @@ namespace dae
 					lightmodeInt = 0;
 				lightingMode = static_cast<LightingMode>(lightmodeInt);
 
-				shadowToggle = false;
 				justClicked = true;
 			}
 		}

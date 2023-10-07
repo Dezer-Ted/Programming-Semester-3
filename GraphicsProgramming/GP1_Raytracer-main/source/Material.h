@@ -112,15 +112,33 @@ namespace dae
 		{
 			//todo: W3
 			//assert(false && "Not Implemented Yet");
-			Vector3 halfVector = (v + l) / ((v + l).Magnitude());
-			halfVector.Normalize();
-			if (m_Metalness == 0)
+			Vector3 halfVector = (v + l).Normalized();
+			ColorRGB f0{};
+			ColorRGB kd{};
+			ColorRGB F{};
+			if (m_Metalness == 0.f)
 			{
-				m_Albedo = { 0.04f,0.04f,0.04f };
+				f0 = { 0.04f,0.04f,0.04f };
+				F = BRDF::FresnelFunction_Schlick(halfVector,v,f0);
+				kd = ColorRGB{ 1,1,1 } - F;
+
 			}
-			ColorRGB F{ BRDF::FresnelFunction_Schlick(halfVector,v,m_Albedo) };
-			float D{ BRDF::NormalDistribution_GGX(hitRecord.normal,halfVector,m_RoughnessSqrd) };
-			return {F*D};
+			else
+			{
+				f0 = m_Albedo;
+				F = BRDF::FresnelFunction_Schlick(halfVector,v,f0);
+				kd = { 0,0,0 };
+
+			}
+
+			const float D{ BRDF::NormalDistribution_GGX(hitRecord.normal,halfVector,m_RoughnessSqrd) };
+			const float G{ BRDF::GeometryFunction_Smith(hitRecord.normal,v,l,m_RoughnessSqrd) };
+
+
+			ColorRGB specular{ (F*D*G) / (4.0f * (v * hitRecord.normal) * (l * hitRecord.normal)) };
+			const ColorRGB diffuse{ BRDF::Lambert(kd,m_Albedo) };
+			specular.MaxToOne();
+			return specular + diffuse;
 		}
 
 	private:
