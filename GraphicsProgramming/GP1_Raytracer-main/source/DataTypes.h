@@ -59,6 +59,20 @@ namespace dae
 
 		TriangleCullMode cullMode{};
 		unsigned char materialIndex{};
+
+		Vector3 operator[](int index) const
+		{
+			switch (index)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			}
+			return v0;
+		}
 	};
 
 	struct TriangleMesh

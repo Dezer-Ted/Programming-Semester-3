@@ -43,7 +43,7 @@ namespace dae
 			BRDF,
 			Combined
 		};
-		LightingMode lightingMode{};
+		LightingMode lightingMode{LightingMode::Combined};
 		Matrix cameraToWorld{};
 
 

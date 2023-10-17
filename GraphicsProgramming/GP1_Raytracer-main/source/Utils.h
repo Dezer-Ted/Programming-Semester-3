@@ -13,7 +13,7 @@ namespace dae
 		//SPHERE HIT-TESTS
 		inline bool HitTest_Sphere(const Sphere& sphere, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{			
-			const Vector3 l{ sphere.origin- ray.origin };
+			const Vector3 l{ sphere.origin - ray.origin };
 			//Calculate distance to a Point orthogonal to the center of the sphere and on the ray
 			//by using the direction and the distance between the spheres origin and the rays
 			const float tca{ Vector3::Dot(ray.direction,l) };
@@ -32,6 +32,8 @@ namespace dae
 
 			if (ignoreHitRecord)
 				return true;
+
+			
 			hitRecord.didHit = true;
 			hitRecord.t = t0;
 			hitRecord.materialIndex = sphere.materialIndex;
@@ -79,8 +81,56 @@ namespace dae
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
 			//todo W5
-			assert(false && "No Implemented Yet!");
-			return false;
+			const Vector3 edgeA{ triangle.v1 - triangle.v0 };
+			const Vector3 edgeB{ triangle.v2 - triangle.v0 };
+			const Vector3 normal{ Vector3::Cross(edgeA,edgeB) };
+			const float rayNormalDot{ normal * ray.direction };
+			
+
+			if(abs( rayNormalDot) < FLT_EPSILON)
+				return false;
+
+			switch (triangle.cullMode)
+			{
+			case TriangleCullMode::FrontFaceCulling:
+				if (rayNormalDot > 0)
+					return false;
+				break;
+			case TriangleCullMode::BackFaceCulling:
+				if (rayNormalDot < 0)
+					return false;
+				break;
+			case TriangleCullMode::NoCulling:
+				break;
+			}
+
+			const Vector3 rayPlane{ triangle.v0 - ray.origin };
+			const float hit{ (rayPlane * normal) / rayNormalDot };
+
+			if (hit< ray.min || hit > ray.max)
+				return false;
+
+			const Vector3 intersectPoint{ ray.origin + (ray.direction * hit) };
+
+			Vector3 edges{};
+			Vector3 cornerViewRay{};
+ 			for (int index = 0; index < 3; ++index)
+			{
+				edges = triangle[(index + 1) % 3] - triangle[index];
+				cornerViewRay = intersectPoint - triangle[index];
+				if (Vector3::Cross(edges, cornerViewRay) * normal < 0)
+					return false;
+			}
+
+			if (ignoreHitRecord)
+				return true;
+
+			hitRecord.didHit = true;
+			hitRecord.materialIndex = triangle.materialIndex;
+			hitRecord.normal = normal;
+			hitRecord.origin = intersectPoint;
+			hitRecord.t = hit;
+			return true;
 		}
 
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray)
