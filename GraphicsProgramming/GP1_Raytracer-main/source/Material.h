@@ -59,9 +59,8 @@ namespace dae
 
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
-			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			
+			return BRDF::Lambert(m_DiffuseReflectance, m_DiffuseColor);
 		}
 
 	private:
@@ -85,8 +84,9 @@ namespace dae
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			//assert(false && "Not Implemented Yet");
+			return BRDF::Lambert(m_DiffuseReflectance, m_DiffuseColor) +
+				BRDF::Phong(m_SpecularReflectance, m_PhongExponent, l, -v, hitRecord.normal);
 		}
 
 	private:
@@ -105,19 +105,47 @@ namespace dae
 		Material_CookTorrence(const ColorRGB& albedo, float metalness, float roughness):
 			m_Albedo(albedo), m_Metalness(metalness), m_Roughness(roughness)
 		{
+			m_RoughnessSqrd = m_Roughness * m_Roughness;
 		}
 
 		ColorRGB Shade(const HitRecord& hitRecord = {}, const Vector3& l = {}, const Vector3& v = {}) override
 		{
 			//todo: W3
-			assert(false && "Not Implemented Yet");
-			return {};
+			//assert(false && "Not Implemented Yet");
+			Vector3 halfVector = (v + l).Normalized();
+			ColorRGB f0{};
+			ColorRGB kd{};
+			ColorRGB F{};
+			if (m_Metalness == 0.f)
+			{
+				f0 = { 0.04f,0.04f,0.04f };
+				F = BRDF::FresnelFunction_Schlick(halfVector,v,f0);
+				kd = ColorRGB{ 1,1,1 } - F;
+
+			}
+			else
+			{
+				f0 = m_Albedo;
+				F = BRDF::FresnelFunction_Schlick(halfVector,v,f0);
+				kd = { 0,0,0 };
+
+			}
+
+			const float D{ BRDF::NormalDistribution_GGX(hitRecord.normal,halfVector,m_RoughnessSqrd) };
+			const float G{ BRDF::GeometryFunction_Smith(hitRecord.normal,v,l,m_RoughnessSqrd) };
+
+
+			ColorRGB specular{ (F*D*G) / (4.0f * (v * hitRecord.normal) * (l * hitRecord.normal)) };
+			const ColorRGB diffuse{ BRDF::Lambert(kd,m_Albedo) };
+			specular.MaxToOne();
+			return specular + diffuse;
 		}
 
 	private:
 		ColorRGB m_Albedo{0.955f, 0.637f, 0.538f}; //Copper
 		float m_Metalness{1.0f};
 		float m_Roughness{0.1f}; // [1.0 > 0.0] >> [ROUGH > SMOOTH]
+		float m_RoughnessSqrd{};
 	};
 #pragma endregion
 }

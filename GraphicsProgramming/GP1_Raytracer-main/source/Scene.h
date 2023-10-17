@@ -41,7 +41,6 @@ namespace dae
 		const std::vector<Sphere>& GetSphereGeometries() const { return m_SphereGeometries; }
 		const std::vector<Light>& GetLights() const { return m_Lights; }
 		const std::vector<Material*> GetMaterials() const { return m_Materials; }
-
 	protected:
 		std::string	sceneName;
 
@@ -50,6 +49,7 @@ namespace dae
 		std::vector<TriangleMesh> m_TriangleMeshGeometries{};
 		std::vector<Light> m_Lights{};
 		std::vector<Material*> m_Materials{};
+		std::vector<Triangle> m_Triangles{};
 
 		Camera m_Camera{};
 
@@ -89,5 +89,32 @@ namespace dae
 		Scene_W2& operator=(Scene_W2&&) noexcept = delete;
 
 		void Initialize() override;
+	};
+	class Scene_W3 final : public Scene
+	{
+	public:
+		Scene_W3() = default;
+		~Scene_W3() override = default;
+
+		Scene_W3(const Scene_W3&) = delete;
+		Scene_W3(Scene_W3&&) noexcept = delete;
+		Scene_W3& operator=(const Scene_W3&) = delete;
+		Scene_W3& operator=(Scene_W3&&) noexcept = delete;
+
+		void Initialize() override;
+	};
+	class Scene_W4 final : public Scene
+	{
+	public:
+		Scene_W4() = default;
+		~Scene_W4() override = default;
+
+		Scene_W4(const Scene_W4&) = delete;
+		Scene_W4(Scene_W4&&) noexcept = delete;
+		Scene_W4& operator=(const Scene_W4) = delete;
+		Scene_W4& operator=(Scene_W4&&) noexcept = delete;
+
+		void Initialize() override;
+
 	};
 }
