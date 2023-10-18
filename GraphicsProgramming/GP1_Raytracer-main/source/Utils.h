@@ -162,13 +162,10 @@ namespace dae
 		{
 			Vector3 direction{};
 			if (light.type == LightType::Point)
-			{
 				direction =   light.origin - origin;
-			}
 			else
-			{
 				direction = light.direction * FLT_MAX;
-			}
+
 			return direction;
 		}
 

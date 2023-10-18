@@ -98,8 +98,8 @@ void Renderer::RenderLighting( const std::vector<Light>& lights,HitRecord closes
 			closestHit.origin + closestHit.normal * 0.001f,
 			lightDirection, 0.0001f, lightDistance
 		};
-
-		const float lambertCos = std::max(0.0f, closestHit.normal * lightRay.direction);
+		
+		const float lambertCos{ std::max(0.0f, closestHit.normal * lightRay.direction) };
 
 		if (!(pScene->DoesHit(lightRay) &&ShadowsEnabled))
 		{
