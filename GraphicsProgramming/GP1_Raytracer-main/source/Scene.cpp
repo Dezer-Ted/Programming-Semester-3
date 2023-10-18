@@ -45,9 +45,9 @@ namespace dae {
 					closestHit = tempClosestHit;
 			}
 		}
-		for (int index{ 0 }; index < m_Triangles.size(); ++index)
+		for (int index{ 0 }; index < m_TriangleMeshGeometries.size(); ++index)
 		{
-			if (GeometryUtils::HitTest_Triangle(m_Triangles[index], ray, tempClosestHit))
+			if (GeometryUtils::HitTest_TriangleMesh(m_TriangleMeshGeometries[index], ray, tempClosestHit))
 			{
 				if (closestHit.t > tempClosestHit.t)
 					closestHit = tempClosestHit;
@@ -72,9 +72,9 @@ namespace dae {
 				return true;
 			}
 		}
-		for (int index{ 0 }; index < m_Triangles.size(); ++index)
+		for (int index{ 0 }; index < m_TriangleMeshGeometries.size(); ++index)
 		{
-			if (GeometryUtils::HitTest_Triangle(m_Triangles[index], ray, temp,true))
+			if (GeometryUtils::HitTest_TriangleMesh(m_TriangleMeshGeometries[index], ray, temp,true))
 			{
 				return true;
 			}
@@ -283,25 +283,25 @@ namespace dae {
 
 		////Triangle (Temp)
 		////===============
-		auto triangle = Triangle{ {-.75f,.5f,.0f},{-.75f,2.f, .0f}, {.75f,.5f,0.f} };
+		/*auto triangle = Triangle{ {-.75f,.5f,.0f},{-.75f,2.f, .0f}, {.75f,.5f,0.f} };
 		triangle.cullMode = TriangleCullMode::BackFaceCulling;
 		triangle.materialIndex = matLambert_White;
 
-		m_Triangles.emplace_back(triangle);
+		m_Triangles.emplace_back(triangle);*/
 
 		//Triangle Mesh
 		//=============
-		//pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
-		//pMesh->positions = {
-		//	{-.75f,-1.f,.0f},  //V0
-		//	{-.75f,1.f, .0f},  //V2
-		//	{.75f,1.f,1.f},    //V3
-		//	{.75f,-1.f,0.f} }; //V4
+		auto pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		pMesh->positions = {
+			{-.75f,-1.f,.0f},  //V0??	V0
+			{-.75f,1.f, .0f},  //V2??	V1
+			{.75f,1.f,1.f},    //V3??	V2
+			{.75f,-1.f,0.f} }; //V4??	V3
 
-		//pMesh->indices = {
-		//	0,1,2, //Triangle 1
-		//	0,2,3  //Triangle 2
-		//};
+		pMesh->indices = {
+			0,1,2, //Triangle 1
+			0,2,3  //Triangle 2
+		};
 
 		//pMesh->CalculateNormals();
 

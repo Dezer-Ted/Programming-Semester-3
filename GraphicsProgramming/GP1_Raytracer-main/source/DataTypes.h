@@ -144,20 +144,38 @@ namespace dae
 
 		void CalculateNormals()
 		{
-			assert(false && "No Implemented Yet!");
+			const int trianglesAmount{ static_cast<int>(indices.size() / 3) };
+			Vector3 edgeA{};
+			Vector3 edgeB{};
+			Vector3 vertA, vertB, vertC;
+			for (int index = 0; index < trianglesAmount; ++index)
+			{
+				vertA = positions[indices[index * 3]];
+				vertB = positions[indices[index * 3 + 1]];
+				vertC = positions[indices[index * 3 + 2]];
+				edgeA = vertB - vertA;
+				edgeB = vertC - vertA;
+				normals.push_back(Vector3::Cross(edgeA, edgeB));
+			}
 		}
 
 		void UpdateTransforms()
 		{
-			assert(false && "No Implemented Yet!");
 			//Calculate Final Transform 
 			//const auto finalTransform = ...
 
 			//Transform Positions (positions > transformedPositions)
 			//...
-
+			for (int index = 0; index < positions.size(); ++index)
+			{
+				transformedPositions[index] = positions[index];
+			}
 			//Transform Normals (normals > transformedNormals)
 			//...
+			for (int index = 0; index < normals.size(); ++index)
+			{
+				transformedNormals[index] = normals[index];
+			}
 		}
 	};
 #pragma endregion
