@@ -87,8 +87,8 @@ namespace dae
 			const float rayNormalDot{ normal * ray.direction };
 			
 
-			if(abs( rayNormalDot) < FLT_EPSILON)
-				return false;
+			/*if(abs( rayNormalDot) < FLT_EPSILON)
+				return false;*/
 
 			switch (triangle.cullMode)
 			{
@@ -146,6 +146,8 @@ namespace dae
 			Triangle tempTriangle{};
 			Vector3 vertA, vertB, vertC;
 			HitRecord tempHit{};
+			tempTriangle.materialIndex = mesh.materialIndex;
+			tempTriangle.cullMode = mesh.cullMode;
 			for (int index = 0; index < mesh.transformedNormals.size(); ++index)
 			{
 				vertA = mesh.transformedPositions[mesh.indices[index * 3]];
@@ -153,8 +155,7 @@ namespace dae
 				vertC = mesh.transformedPositions[mesh.indices[index * 3 + 2]];
 				tempTriangle = Triangle{ vertA,vertB,vertC };
 				tempTriangle.normal = mesh.transformedNormals[index];
-				tempTriangle.materialIndex = mesh.materialIndex;
-				tempTriangle.cullMode = mesh.cullMode;
+				
 				if (HitTest_Triangle(tempTriangle, ray, tempHit))
 				{
 					if (ignoreHitRecord)
@@ -166,7 +167,10 @@ namespace dae
 				}
 			}
 			if (hitRecord.didHit)
+			{
+				hitRecord.materialIndex = mesh.materialIndex;
 				return true;
+			}
 			return false;
 		}
 
