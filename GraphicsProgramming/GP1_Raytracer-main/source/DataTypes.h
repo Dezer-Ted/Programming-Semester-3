@@ -155,26 +155,29 @@ namespace dae
 				vertC = positions[indices[index * 3 + 2]];
 				edgeA = vertB - vertA;
 				edgeB = vertC - vertA;
-				normals.push_back(Vector3::Cross(edgeA, edgeB));
+				normals.emplace_back(Vector3::Cross(edgeA, edgeB));
 			}
 		}
 
 		void UpdateTransforms()
 		{
 			//Calculate Final Transform 
-			//const auto finalTransform = ...
+			const auto finalTransform{ translationTransform * scaleTransform * rotationTransform };
 
 			//Transform Positions (positions > transformedPositions)
 			//...
+			transformedPositions.resize(positions.size());
+			transformedNormals.resize(normals.size());
 			for (int index = 0; index < positions.size(); ++index)
 			{
-				transformedPositions[index] = positions[index];
+				
+				transformedPositions[index] = finalTransform.TransformPoint(positions[index]);
 			}
 			//Transform Normals (normals > transformedNormals)
 			//...
 			for (int index = 0; index < normals.size(); ++index)
 			{
-				transformedNormals[index] = normals[index];
+				transformedNormals[index] = finalTransform.TransformPoint(normals[index]);
 			}
 		}
 	};

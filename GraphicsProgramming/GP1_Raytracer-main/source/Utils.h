@@ -153,6 +153,8 @@ namespace dae
 				vertC = mesh.transformedPositions[mesh.indices[index * 3 + 2]];
 				tempTriangle = Triangle{ vertA,vertB,vertC };
 				tempTriangle.normal = mesh.transformedNormals[index];
+				tempTriangle.materialIndex = mesh.materialIndex;
+				tempTriangle.cullMode = mesh.cullMode;
 				if (HitTest_Triangle(tempTriangle, ray, tempHit))
 				{
 					if (ignoreHitRecord)

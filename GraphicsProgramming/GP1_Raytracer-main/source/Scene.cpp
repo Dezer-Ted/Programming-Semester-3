@@ -291,7 +291,7 @@ namespace dae {
 
 		//Triangle Mesh
 		//=============
-		auto pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
+		pMesh = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
 		pMesh->positions = {
 			{-.75f,-1.f,.0f},  //V0??	V0
 			{-.75f,1.f, .0f},  //V2??	V1
@@ -303,10 +303,10 @@ namespace dae {
 			0,2,3  //Triangle 2
 		};
 
-		//pMesh->CalculateNormals();
+		pMesh->CalculateNormals();
 
-		//pMesh->Translate({ 0.f,1.5f,0.f });
-		//pMesh->UpdateTransforms();
+		pMesh->Translate({ 0.f,1.5f,0.f });
+		pMesh->UpdateTransforms();
 
 		////OBJ
 		////===
@@ -328,6 +328,12 @@ namespace dae {
 		AddPointLight(Vector3{ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f, .61f, .45f }); //Backlight
 		AddPointLight(Vector3{ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f, .8f, .45f }); //Front Light Left
 		AddPointLight(Vector3{ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f, .47f, .68f });
+	}
+	void Scene_W4::Update(Timer* pTimer) 
+	{
+		Scene::Update(pTimer);
+		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		pMesh->UpdateTransforms();
 	}
 #pragma endregion
 }
