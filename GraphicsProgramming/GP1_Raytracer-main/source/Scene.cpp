@@ -312,7 +312,7 @@ namespace dae {
 		////OBJ
 		////===
 		pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/simple_cube.obj",
+		Utils::ParseOBJ("Resources/simple_object.obj",
 		//Utils::ParseOBJ("Resources/simple_object.obj",
 			pMesh->positions, 
 			pMesh->normals, 
@@ -333,8 +333,8 @@ namespace dae {
 	void Scene_W4::Update(Timer* pTimer) 
 	{
 		Scene::Update(pTimer);
-		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
-		pMesh->UpdateTransforms();
+		/*pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		pMesh->UpdateTransforms();*/
 	}
 
 	void Scene_W4_ReferenceScene::Initialize()
@@ -433,8 +433,9 @@ namespace dae {
 		pMesh->Scale({ 2.f,2.f,2.f });
 		pMesh->RotateY(PI);
 
+		pMesh->UpdateAABB();
 		pMesh->UpdateTransforms();
-
+		
 
 		AddPointLight(Vector3{ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f, .61f, .45f }); //Backlight
 		AddPointLight(Vector3{ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f, .8f, .45f }); //Front Light Left

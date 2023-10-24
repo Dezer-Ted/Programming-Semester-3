@@ -80,24 +80,17 @@ namespace dae
 		//TRIANGLE HIT-TESTS
 		inline bool HitTest_Triangle(const Triangle& triangle, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
-			//todo W5
-			const Vector3 edgeA{ triangle.v1 - triangle.v0 };
-			const Vector3 edgeB{ triangle.v2 - triangle.v0 };
-			const Vector3 normal{ Vector3::Cross(edgeA,edgeB) };
-			const float rayNormalDot{ normal * ray.direction };
 			
-
-			/*if(abs( rayNormalDot) < FLT_EPSILON)
-				return false;*/
-
+			//todo W5
+			const float rayNormalDot{ triangle.normal * ray.direction };
 			switch (triangle.cullMode)
 			{
 			case TriangleCullMode::FrontFaceCulling:
-				if (rayNormalDot > 0)
+				if (rayNormalDot < 0)
 					return false;
 				break;
 			case TriangleCullMode::BackFaceCulling:
-				if (rayNormalDot < 0)
+				if (rayNormalDot > 0)
 					return false;
 				break;
 			case TriangleCullMode::NoCulling:
@@ -105,7 +98,7 @@ namespace dae
 			}
 
 			const Vector3 rayPlane{ triangle.v0 - ray.origin };
-			const float hit{ (rayPlane * normal) / rayNormalDot };
+			const float hit{ (rayPlane * triangle.normal) / rayNormalDot };
 
 			if (hit< ray.min || hit > ray.max)
 				return false;
@@ -118,7 +111,7 @@ namespace dae
 			{
 				edges = triangle[(index + 1) % 3] - triangle[index];
 				cornerViewRay = intersectPoint - triangle[index];
-				if (Vector3::Cross(edges, cornerViewRay) * normal < 0)
+				if (Vector3::Cross(edges, cornerViewRay) * triangle.normal < 0)
 					return false;
 			}
 
@@ -127,7 +120,7 @@ namespace dae
 
 			hitRecord.didHit = true;
 			hitRecord.materialIndex = triangle.materialIndex;
-			hitRecord.normal = normal;
+			hitRecord.normal = triangle.normal;
 			hitRecord.origin = intersectPoint;
 			hitRecord.t = hit;
 			return true;
@@ -140,22 +133,51 @@ namespace dae
 		}
 #pragma endregion
 #pragma region TriangeMesh HitTest
+		inline bool SlabTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
+		{
+			float tx1 = (mesh.transformedMinAABB.x - ray.origin.x) / ray.direction.x;
+			float tx2 = (mesh.transformedMaxAABB.x - ray.origin.x) / ray.direction.x;
+
+			float tmin = std::min(tx1, tx2);
+			float tmax = std::max(tx1, tx2);
+
+			float ty1 = (mesh.transformedMinAABB.y - ray.origin.y) / ray.direction.y;
+			float ty2 = (mesh.transformedMaxAABB.y - ray.origin.y) / ray.direction.y;
+
+			tmin = std::max(tmin, std::min(ty1, ty2));
+			tmax = std::min(tmax, std::max(ty1, ty2));
+
+			float tz1 = (mesh.transformedMinAABB.z - ray.origin.z) / ray.direction.z;
+			float tz2 = (mesh.transformedMaxAABB.z - ray.origin.z) / ray.direction.z;
+
+			tmin = std::max(tmin, std::min(tz1, tz2));
+			tmax = std::min(tmax, std::max(tz1, tz2));
+
+			return tmax > 0 && tmax >= tmin;
+
+			return tmax > 0 && tmax >= tmin;
+		}
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
+			if (!SlabTest_TriangleMesh(mesh, ray))
+				return false;
+
 			//todo W5
 			Triangle tempTriangle{};
 			Vector3 vertA, vertB, vertC;
 			HitRecord tempHit{};
-			tempTriangle.materialIndex = mesh.materialIndex;
-			tempTriangle.cullMode = mesh.cullMode;
 			for (int index = 0; index < mesh.transformedNormals.size(); ++index)
 			{
 				vertA = mesh.transformedPositions[mesh.indices[index * 3]];
 				vertB = mesh.transformedPositions[mesh.indices[index * 3 + 1]];
 				vertC = mesh.transformedPositions[mesh.indices[index * 3 + 2]];
 				tempTriangle = Triangle{ vertA,vertB,vertC };
+				tempTriangle.cullMode = mesh.cullMode;
+				tempTriangle.materialIndex = mesh.materialIndex;
 				tempTriangle.normal = mesh.transformedNormals[index];
-				
+
+				//tempTriangle.normal = mesh.transformedNormals[index];
+
 				if (HitTest_Triangle(tempTriangle, ray, tempHit))
 				{
 					if (ignoreHitRecord)
@@ -168,10 +190,12 @@ namespace dae
 			}
 			if (hitRecord.didHit)
 			{
-				hitRecord.materialIndex = mesh.materialIndex;
+				//hitRecord.materialIndex = mesh.materialIndex;
 				return true;
 			}
 			return false;
+			;
+
 		}
 
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray)
@@ -179,6 +203,7 @@ namespace dae
 			HitRecord temp{};
 			return HitTest_TriangleMesh(mesh, ray, temp, true);
 		}
+		
 #pragma endregion
 	}
 
@@ -277,6 +302,7 @@ namespace dae
 
 			return true;
 		}
+	
 #pragma warning(pop)
 	}
 }
