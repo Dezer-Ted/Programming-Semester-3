@@ -423,7 +423,7 @@ namespace dae {
 
 		
 		pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/lowpoly_bunny.obj",
+		Utils::ParseOBJ("Resources/Erberon.obj",
 			//Utils::ParseOBJ("Resources/simple_object.obj",
 			pMesh->positions,
 			pMesh->normals,

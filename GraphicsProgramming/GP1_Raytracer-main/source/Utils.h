@@ -155,7 +155,6 @@ namespace dae
 
 			return tmax > 0 && tmax >= tmin;
 
-			return tmax > 0 && tmax >= tmin;
 		}
 		inline bool HitTest_TriangleMesh(const TriangleMesh& mesh, const Ray& ray, HitRecord& hitRecord, bool ignoreHitRecord = false)
 		{
