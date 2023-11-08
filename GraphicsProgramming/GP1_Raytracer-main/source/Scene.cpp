@@ -319,6 +319,7 @@ namespace dae {
 			pMesh->indices);
 
 		//No need to Calculate the normals, these are calculated inside the ParseOBJ function
+		pMesh->UpdateAABB();
 		pMesh->UpdateTransforms();
 
 		pMesh->Scale({ .7f,.7f,.7f });
@@ -333,8 +334,8 @@ namespace dae {
 	void Scene_W4::Update(Timer* pTimer) 
 	{
 		Scene::Update(pTimer);
-		/*pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
-		pMesh->UpdateTransforms();*/
+		pMesh->RotateY(PI_DIV_2 * pTimer->GetTotal());
+		pMesh->UpdateTransforms();
 	}
 
 	void Scene_W4_ReferenceScene::Initialize()
@@ -372,16 +373,19 @@ namespace dae {
 		m_Meshes[0] = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
 		m_Meshes[0]->AppendTriangle(baseTriangle, true);
 		m_Meshes[0]->Translate({ -1.75f,4.5f,0.f });
+		m_Meshes[0]->UpdateAABB();
 		m_Meshes[0]->UpdateTransforms();
 
 		m_Meshes[1] = AddTriangleMesh(TriangleCullMode::FrontFaceCulling, matLambert_White);
 		m_Meshes[1]->AppendTriangle(baseTriangle, true);
 		m_Meshes[1]->Translate({ 0.f,4.5f,0.f });
+		m_Meshes[1]->UpdateAABB();
 		m_Meshes[1]->UpdateTransforms();
 
 		m_Meshes[2] = AddTriangleMesh(TriangleCullMode::NoCulling, matLambert_White);
 		m_Meshes[2]->AppendTriangle(baseTriangle, true);
 		m_Meshes[2]->Translate({ 1.75f,4.5f,0.f });
+		m_Meshes[2]->UpdateAABB();
 		m_Meshes[2]->UpdateTransforms();
 
 		AddPointLight(Vector3{ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f, .61f, .45f }); //Backlight
@@ -423,7 +427,7 @@ namespace dae {
 
 		
 		pMesh = AddTriangleMesh(TriangleCullMode::BackFaceCulling, matLambert_White);
-		Utils::ParseOBJ("Resources/Erberon.obj",
+		Utils::ParseOBJ("Resources/lowpoly_bunny.obj",
 			//Utils::ParseOBJ("Resources/simple_object.obj",
 			pMesh->positions,
 			pMesh->normals,
@@ -440,6 +444,14 @@ namespace dae {
 		AddPointLight(Vector3{ 0.f, 5.f, 5.f }, 50.f, ColorRGB{ 1.f, .61f, .45f }); //Backlight
 		AddPointLight(Vector3{ -2.5f, 5.f, -5.f }, 70.f, ColorRGB{ 1.f, .8f, .45f }); //Front Light Left
 		AddPointLight(Vector3{ 2.5f, 2.5f, -5.f }, 50.f, ColorRGB{ .34f, .47f, .68f });
+	}
+	void Scene_W4_BunnyScene::Update(Timer* pTimer)
+	{
+		Scene::Update(pTimer);
+		const auto yawAngle = (cos(pTimer->GetTotal()) + 1.f) / 2.f * PI_2;
+		pMesh->RotateY(yawAngle);
+		pMesh->UpdateTransforms();
+
 	}
 #pragma endregion
 }

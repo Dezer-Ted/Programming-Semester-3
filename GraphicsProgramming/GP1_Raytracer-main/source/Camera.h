@@ -190,6 +190,13 @@ namespace dae
 
 				justClicked = true;
 			}
+			else if (pKeyboardState[SDL_SCANCODE_F6] == true)
+			{
+				if (pTimer->IsRunning())
+					pTimer->StartBenchmark();
+				else
+					pTimer->Stop();
+			}
 		}
 		void CalculateFOVScale()
 		{

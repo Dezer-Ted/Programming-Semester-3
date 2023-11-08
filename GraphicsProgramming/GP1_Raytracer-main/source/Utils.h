@@ -82,7 +82,11 @@ namespace dae
 		{
 			
 			//todo W5
-			const float rayNormalDot{ triangle.normal * ray.direction };
+			const Vector3 edgeA{ triangle.v1 - triangle.v0 };
+			const Vector3 edgeB{ triangle.v2 - triangle.v0 };
+			const Vector3 normal{ Vector3::Cross(edgeA,edgeB) };
+			const float rayNormalDot{ normal * ray.direction };
+			//const float rayNormalDot{ triangle.normal * ray.direction };
 			switch (triangle.cullMode)
 			{
 			case TriangleCullMode::FrontFaceCulling:
@@ -98,7 +102,7 @@ namespace dae
 			}
 
 			const Vector3 rayPlane{ triangle.v0 - ray.origin };
-			const float hit{ (rayPlane * triangle.normal) / rayNormalDot };
+			const float hit{ (rayPlane * normal) / rayNormalDot };
 
 			if (hit< ray.min || hit > ray.max)
 				return false;
@@ -111,7 +115,7 @@ namespace dae
 			{
 				edges = triangle[(index + 1) % 3] - triangle[index];
 				cornerViewRay = intersectPoint - triangle[index];
-				if (Vector3::Cross(edges, cornerViewRay) * triangle.normal < 0)
+				if (Vector3::Cross(edges, cornerViewRay) * normal < 0)
 					return false;
 			}
 
